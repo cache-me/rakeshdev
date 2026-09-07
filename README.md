@@ -69,3 +69,27 @@ Copied from `prodios_ai/vite-fullstack-starter/.agents/skills` plus `frontend-ne
 ## Production
 
 Use `docker-compose.yml` + `docker-compose.prod.yml`. Configure secrets (`BETTER_AUTH_SECRET`, `DATABASE_URL`, optional `AI_API_KEY`) via environment — never commit `.env`.
+
+### Supabase (database + optional API)
+
+This app uses **PostgreSQL via Drizzle** and **Better Auth** (not Supabase Auth). Your Supabase project is the hosted Postgres database.
+
+1. In [Supabase Dashboard](https://supabase.com/dashboard) → **Project Settings → Database**, copy the **database password** and connection strings.
+2. In the repo root `.env`, set **`DATABASE_URL`** to the **Transaction pooler** URI (port **6543**, `?pgbouncer=true`) for the API.
+3. Add your Supabase API keys (`SUPABASE_URL`, publishable/secret keys, `SUPABASE_JWKS_URL`) — see `.env.example`.
+4. Apply schema to Supabase:
+
+   ```bash
+   # Use Direct connection (port 5432) in DATABASE_URL for migrate if pooler fails
+   pnpm db:migrate
+   pnpm db:seed          # optional first-time content
+   pnpm create-admin …   # admin login
+   ```
+
+5. Deploy API with the same `DATABASE_URL` and auth env vars; deploy web on Vercel with `API_URL` pointing at your API.
+
+**Security:** Never commit `SUPABASE_SECRET_KEY` or DB passwords. If a secret was exposed, rotate it in Supabase → **Project Settings → API → Secret keys**.
+
+### Vercel (frontend only)
+
+See `apps/web/vercel.json`. Host the API separately; set `NEXT_PUBLIC_SITE_URL` and `API_URL` on Vercel.

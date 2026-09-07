@@ -1,0 +1,191 @@
+@import "tailwindcss";
+
+:root {
+  --background: 220 20% 97%;
+  --foreground: 222 47% 11%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
+  --primary: 222 89% 55%;
+  --primary-foreground: 210 40% 98%;
+  --muted: 220 14% 92%;
+  --muted-foreground: 220 9% 40%;
+  --border: 220 13% 88%;
+  --ring: 222 89% 55%;
+  --radius: 0.75rem;
+}
+
+.dark {
+  --background: 222 47% 6%;
+  --foreground: 210 40% 96%;
+  --card: 222 40% 9%;
+  --card-foreground: 210 40% 96%;
+  --primary: 217 91% 60%;
+  --primary-foreground: 222 47% 6%;
+  --muted: 223 30% 14%;
+  --muted-foreground: 215 20% 70%;
+  --border: 223 30% 18%;
+  --ring: 217 91% 60%;
+}
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-border: hsl(var(--border));
+  --color-ring: hsl(var(--ring));
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --radius-lg: var(--radius);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+.noise-bg {
+  background-image: radial-gradient(hsl(var(--foreground) / 0.04) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.glow-ring {
+  box-shadow: 0 0 0 1px hsl(var(--border)), 0 20px 60px -20px hsl(var(--primary) / 0.35);
+}
+
+/* Cyber HUD homepage */
+.cyber-page {
+  --cyber-bg: #080b10;
+  --cyber-panel: rgba(12, 18, 28, 0.85);
+  --cyber-border: rgba(45, 212, 168, 0.22);
+  --cyber-accent: #2dd4a8;
+  --cyber-accent-dim: rgba(45, 212, 168, 0.12);
+  --cyber-purple: #a78bfa;
+  --cyber-text: #e8edf4;
+  --cyber-muted: #8b9cb3;
+  background-color: var(--cyber-bg);
+  color: var(--cyber-text);
+  min-height: 100vh;
+}
+
+.cyber-page::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(45, 212, 168, 0.08), transparent),
+    radial-gradient(circle at 100% 50%, rgba(167, 139, 250, 0.04), transparent);
+  z-index: 0;
+}
+
+.cyber-grid-bg {
+  background-image:
+    linear-gradient(rgba(45, 212, 168, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(45, 212, 168, 0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+.hud-panel {
+  position: relative;
+  border: 1px solid var(--cyber-border);
+  background: var(--cyber-panel);
+  backdrop-filter: blur(12px);
+}
+
+.hud-panel::before,
+.hud-panel::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-color: var(--cyber-accent);
+  border-style: solid;
+  pointer-events: none;
+}
+
+.hud-panel::before {
+  top: -1px;
+  left: -1px;
+  border-width: 2px 0 0 2px;
+}
+
+.hud-panel::after {
+  bottom: -1px;
+  right: -1px;
+  border-width: 0 2px 2px 0;
+}
+
+.hud-label {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cyber-accent);
+}
+
+.cyber-nav-pill {
+  border: 1px solid rgba(45, 212, 168, 0.15);
+  background: rgba(8, 12, 20, 0.75);
+  backdrop-filter: blur(16px);
+}
+
+.cyber-btn-primary {
+  background: var(--cyber-accent);
+  color: #041510;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.cyber-btn-primary:hover {
+  box-shadow: 0 0 24px rgba(45, 212, 168, 0.45);
+}
+
+.cyber-btn-outline {
+  border: 1px solid var(--cyber-border);
+  background: transparent;
+  color: var(--cyber-text);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.cyber-btn-outline:hover {
+  border-color: var(--cyber-accent);
+  background: var(--cyber-accent-dim);
+}
+
+.cyber-tag {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.65rem;
+  border: 1px solid rgba(45, 212, 168, 0.25);
+  background: rgba(45, 212, 168, 0.06);
+  color: var(--cyber-muted);
+  padding: 0.25rem 0.5rem;
+}
+
+.terminal-line {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.7rem;
+  color: var(--cyber-muted);
+  line-height: 1.6;
+}
+
+.terminal-line .ok {
+  color: var(--cyber-accent);
+}
+

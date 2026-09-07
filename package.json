@@ -15,6 +15,7 @@
     "db:migrate": "pnpm --filter @portfolio/db db:migrate",
     "db:push": "pnpm --filter @portfolio/db db:push",
     "db:seed": "pnpm --filter @portfolio/db db:seed",
+    "db:reset-schema": "pnpm --filter @portfolio/db db:reset-schema",
     "db:setup": "pnpm --filter @portfolio/db db:setup",
     "db:studio": "pnpm --filter @portfolio/db db:studio",
     "create-admin": "pnpm --filter @portfolio/api run create-admin",

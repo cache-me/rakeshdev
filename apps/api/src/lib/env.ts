@@ -26,6 +26,11 @@ const envSchema = z.object({
     .union([z.literal('true'), z.literal('false'), z.boolean()])
     .optional()
     .transform((v) => v !== 'false' && v !== false),
+  /** Supabase project URL (https://xxxx.supabase.co) — optional; used for Storage / REST */
+  SUPABASE_URL: z.string().url().optional(),
+  SUPABASE_PUBLISHABLE_KEY: z.string().optional(),
+  SUPABASE_SECRET_KEY: z.string().optional(),
+  SUPABASE_JWKS_URL: z.string().url().optional(),
 })
 
 export const env = envSchema.parse(process.env)

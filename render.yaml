@@ -1,0 +1,45 @@
+# Render Blueprint — deploy the Hono API against Supabase Postgres
+# https://dashboard.render.com → New → Blueprint → connect this repo
+#
+# After deploy, set the public API URL on Vercel as API_URL
+# and set CORS_ORIGIN / BETTER_AUTH_URL to your Vercel site URL.
+
+services:
+  - type: web
+    name: portfolio-api
+    runtime: docker
+    dockerfilePath: ./apps/api/Dockerfile
+    dockerContext: .
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3000"
+      - key: DATABASE_URL
+        sync: false
+      - key: BETTER_AUTH_SECRET
+        sync: false
+      - key: BETTER_AUTH_URL
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false
+      - key: AI_API_KEY
+        sync: false
+      - key: AI_PROVIDER
+        value: anthropic
+      - key: AI_MODEL
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: CONTACT_FROM_EMAIL
+        sync: false
+      - key: CONTACT_TO_EMAIL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SECRET_KEY
+        sync: false
+      - key: SUPABASE_PUBLISHABLE_KEY
+        sync: false
