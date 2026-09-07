@@ -1,0 +1,21 @@
+{
+  "name": "@portfolio/resume",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "echo ok"
+  },
+  "dependencies": {
+    "@portfolio/validation": "workspace:*"
+  },
+  "devDependencies": {
+    "@portfolio/config": "workspace:*",
+    "playwright": "^1.51.0",
+    "typescript": "^5.8.3"
+  }
+}

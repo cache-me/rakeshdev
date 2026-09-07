@@ -1,0 +1,19 @@
+{
+  "name": "@portfolio/config",
+  "type": "module",
+  "private": true,
+  "files": ["prettier.config.js", "eslint.config.js", "typescript"],
+  "scripts": {
+    "lint": "echo ok",
+    "format": "prettier --write --cache ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@stylistic/eslint-plugin": "^5.10.0",
+    "eslint": "^9.39.1",
+    "eslint-plugin-import": "^2.32.0",
+    "globals": "^17.6.0",
+    "prettier": "^3.8.4",
+    "typescript-eslint": "^8.61.1"
+  }
+}

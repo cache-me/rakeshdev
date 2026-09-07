@@ -1,0 +1,14 @@
+node_modules
+dist
+.next
+.turbo
+.env
+.env.local
+*.log
+coverage
+playwright-report
+test-results
+
+# Private identity docs (seed copies assets here; never commit scans)
+apps/api/storage/personal/*
+!apps/api/storage/personal/.gitkeep

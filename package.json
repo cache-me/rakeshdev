@@ -1,0 +1,30 @@
+{
+  "name": "portfolio",
+  "private": true,
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "db:generate": "pnpm --filter @portfolio/db db:generate",
+    "db:migrate": "pnpm --filter @portfolio/db db:migrate",
+    "db:push": "pnpm --filter @portfolio/db db:push",
+    "db:seed": "pnpm --filter @portfolio/db db:seed",
+    "db:setup": "pnpm --filter @portfolio/db db:setup",
+    "db:studio": "pnpm --filter @portfolio/db db:studio",
+    "create-admin": "pnpm --filter @portfolio/api run create-admin",
+    "format": "prettier --write \"**/*.{ts,tsx,js,json,md}\" --ignore-path .gitignore"
+  },
+  "devDependencies": {
+    "@portfolio/config": "workspace:*",
+    "prettier": "^3.8.4",
+    "turbo": "^2.9.18",
+    "tsx": "^4.19.2",
+    "typescript": "^5.8.3"
+  }
+}

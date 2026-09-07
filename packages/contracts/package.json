@@ -1,0 +1,22 @@
+{
+  "name": "@portfolio/contracts",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "echo ok",
+    "build": "echo ok"
+  },
+  "dependencies": {
+    "@portfolio/validation": "workspace:*",
+    "@ts-rest/core": "^3.52.1",
+    "zod": "^3.25.67"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  }
+}

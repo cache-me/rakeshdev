@@ -1,0 +1,41 @@
+{
+  "name": "@portfolio/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc --noEmit",
+    "start": "tsx src/index.ts",
+    "lint": "eslint --fix --cache .",
+    "typecheck": "tsc --noEmit",
+    "create-admin": "tsx scripts/create-admin.ts",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.14.4",
+    "@portfolio/contracts": "workspace:*",
+    "@portfolio/db": "workspace:*",
+    "@portfolio/resume": "workspace:*",
+    "@portfolio/types": "workspace:*",
+    "@portfolio/validation": "workspace:*",
+    "@ts-rest/core": "^3.52.1",
+    "better-auth": "^1.2.8",
+    "dotenv": "^16.4.7",
+    "drizzle-orm": "^0.45.2",
+    "hono": "^4.7.11",
+    "playwright": "^1.51.0",
+    "postgres": "^3.4.5",
+    "resend": "^6.26.0",
+    "zod": "^3.25.67"
+  },
+  "devDependencies": {
+    "@portfolio/config": "workspace:*",
+    "@types/node": "^22.15.30",
+    "eslint": "^9.39.1",
+    "tsc-alias": "^1.8.10",
+    "tsx": "^4.19.2",
+    "typescript": "^5.8.3",
+    "vitest": "^3.0.9"
+  }
+}
