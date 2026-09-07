@@ -92,4 +92,22 @@ This app uses **PostgreSQL via Drizzle** and **Better Auth** (not Supabase Auth)
 
 ### Vercel (frontend only)
 
+1. Push repo to GitHub (monorepo must include `apps/web` as normal files — not a submodule).
+2. [vercel.com](https://vercel.com) → **Add New Project** → import `cache-me/rakeshdev`.
+3. **Root Directory:** `apps/web`
+4. Env vars (Production):
+   - `NEXT_PUBLIC_SITE_URL` = `https://YOUR-APP.vercel.app`
+   - `API_URL` = `https://YOUR-API.onrender.com` (no trailing slash)
+5. Deploy.
+
+### Render (API)
+
+1. [dashboard.render.com](https://dashboard.render.com) → **New** → **Blueprint** → select this repo (`render.yaml`).
+2. Set sync:false env vars (see `.env.production.example`):
+   - `DATABASE_URL` = Supabase **Transaction pooler** (`:6543` + `?pgbouncer=true`)
+   - `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `CORS_ORIGIN` (same as Vercel site URL)
+   - Optional: `AI_API_KEY`, Resend, Supabase API keys
+3. After API is live, put its URL into Vercel `API_URL` and redeploy web.
+4. Update API `BETTER_AUTH_URL` + `CORS_ORIGIN` if the Vercel URL changed.
+
 See `apps/web/vercel.json`. Host the API separately; set `NEXT_PUBLIC_SITE_URL` and `API_URL` on Vercel.
