@@ -14,8 +14,9 @@ serve(
   {
     fetch: app.fetch,
     port: env.PORT,
+    hostname: '0.0.0.0',
   },
   (info) => {
-    process.stdout.write(`API listening on http://localhost:${info.port}\n`)
+    process.stdout.write(`API listening on http://0.0.0.0:${info.port}\n`)
   },
 )

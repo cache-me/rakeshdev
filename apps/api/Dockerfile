@@ -9,12 +9,16 @@ COPY packages/db/package.json packages/db/
 COPY packages/contracts/package.json packages/contracts/
 COPY packages/types/package.json packages/types/
 COPY packages/validation/package.json packages/validation/
+COPY packages/resume/package.json packages/resume/
 COPY packages/config/package.json packages/config/
+COPY packages/ui/package.json packages/ui/
 RUN pnpm install --frozen-lockfile || pnpm install
 
 FROM deps AS runner
 WORKDIR /app
 ENV NODE_ENV=production
+ENV PORT=3000
 COPY . .
+RUN chmod +x apps/api/docker-entrypoint.sh
 EXPOSE 3000
-CMD ["pnpm", "--filter", "@portfolio/api", "start"]
+CMD ["apps/api/docker-entrypoint.sh"]

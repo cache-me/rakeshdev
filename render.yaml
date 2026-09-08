@@ -3,6 +3,11 @@
 #
 # After deploy, set the public API URL on Vercel as API_URL
 # and set CORS_ORIGIN / BETTER_AUTH_URL to your Vercel site URL.
+#
+# Required on Render → Environment:
+#   DATABASE_URL = Supabase pooler URI ending with :6543/postgres?pgbouncer=true
+#   BETTER_AUTH_SECRET, BETTER_AUTH_URL, CORS_ORIGIN
+# Container runs migrations on every start (safe / idempotent).
 
 services:
   - type: web
