@@ -1,7 +1,12 @@
+import dns from 'node:dns'
+
 import { drizzle } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
 
 import * as schema from './schema/index'
+
+// Prefer IPv4 — Render free / many hosts cannot reach Supabase Direct (IPv6-only).
+dns.setDefaultResultOrder('ipv4first')
 
 export type Database = ReturnType<typeof createDb>['db']
 
@@ -14,6 +19,13 @@ function isPoolerUrl(connectionString: string) {
 }
 
 export function createDb(connectionString: string) {
+  if (/@db\.[^/]+\.supabase\.co/i.test(connectionString)) {
+    console.warn(
+      '[portfolio/db] Warning: Direct Supabase host (db.*.supabase.co) is IPv6-only. ' +
+        'Use Transaction pooler (:6543?pgbouncer=true) on Render/Vercel/cloud hosts.',
+    )
+  }
+
   const pooled = isPoolerUrl(connectionString)
   const client = postgres(connectionString, {
     max: pooled ? 1 : 10,
