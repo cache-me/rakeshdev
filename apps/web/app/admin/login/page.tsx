@@ -7,7 +7,7 @@ export default function AdminLoginPage() {
         <span className="text-[var(--cyber-muted)]">[</span>
         DEV ARCHITECT.IO
         <span className="text-[var(--cyber-muted)]">]</span>
-        <span className="text-[var(--cyber-muted)]"> // </span>
+        <span className="text-[var(--cyber-muted)]">{' // '}</span>
         SECURE_ADMIN_PORT
       </p>
       <AdminLoginForm />

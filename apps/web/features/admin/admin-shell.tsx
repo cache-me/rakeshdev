@@ -74,7 +74,7 @@ export default function AdminShell({ children }: React.PropsWithChildren) {
               <span className="text-[var(--cyber-muted)]">[</span>
               DEV ARCHITECT.IO
               <span className="text-[var(--cyber-muted)]">]</span>
-              <span className="text-[var(--cyber-muted)]"> // </span>
+              <span className="text-[var(--cyber-muted)]">{' // '}</span>
               KERNEL_ADMIN
             </p>
           </div>
