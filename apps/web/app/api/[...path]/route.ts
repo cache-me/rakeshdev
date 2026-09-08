@@ -48,8 +48,8 @@ async function proxyRequest(req: NextRequest, pathSegments: string[]) {
     headers,
     redirect: 'manual',
     cache: 'no-store',
-    // Don't let Vercel functions hang for the full platform limit when Render/DB stalls
-    signal: AbortSignal.timeout(20_000),
+    // Keep under homepage SSR budget so proxy failures fail fast
+    signal: AbortSignal.timeout(8_000),
   }
 
   if (req.method !== 'GET' && req.method !== 'HEAD') {

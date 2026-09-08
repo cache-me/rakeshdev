@@ -1,9 +1,11 @@
+import { unstable_noStore as noStore } from 'next/cache'
+
 import CyberHomePage from '@/features/home/cyber-home-page'
-import { apiClient } from '@/lib/api'
+import { apiClient, SSR_REVALIDATE_SECONDS } from '@/lib/api'
 import { createPageMetadata, personJsonLd } from '@/lib/seo'
 
-/** Always fetch fresh portfolio data — blank SSR must not be cached when the API is down. */
-export const dynamic = 'force-dynamic'
+/** Cache warm homepage HTML; skipped via noStore() when the API returns nothing. */
+export const revalidate = SSR_REVALIDATE_SECONDS
 
 export const metadata = createPageMetadata({
   title: 'Rakesh — Full-Stack Developer',
@@ -21,7 +23,7 @@ async function loadHomeData() {
     apiClient.services.list(),
   ])
 
-  return {
+  const data = {
     settings: settingsRes.status === 200 && settingsRes.body.success ? settingsRes.body.data : null,
     projects:
       projectsRes.status === 200 && projectsRes.body.success ? projectsRes.body.data : [],
@@ -31,6 +33,16 @@ async function loadHomeData() {
     services:
       servicesRes.status === 200 && servicesRes.body.success ? servicesRes.body.data : [],
   }
+
+  // Do not ISR-cache an empty shell when Render/DB timed out
+  const apiEmpty =
+    !data.settings &&
+    data.projects.length === 0 &&
+    data.skills.length === 0 &&
+    data.experience.length === 0
+  if (apiEmpty) noStore()
+
+  return data
 }
 
 export default async function HomePage() {

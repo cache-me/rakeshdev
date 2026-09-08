@@ -1,8 +1,10 @@
 import { initClient, type ApiFetcherArgs } from '@ts-rest/core'
 import { contract } from '@portfolio/contracts'
 
-/** Short ISR window — empty/timeout responses should not stick for minutes. */
-const SSR_FETCH_TIMEOUT_MS = 18_000
+/** ISR for successful GETs — keeps homepage fast after the first warm response. */
+export const SSR_REVALIDATE_SECONDS = 120
+/** Fail fast when Render/DB is hung so TTFB does not sit near 20s. */
+const SSR_FETCH_TIMEOUT_MS = 5_000
 
 /**
  * Browser: same-origin `/api` (Next rewrite).
@@ -34,6 +36,7 @@ function serializeRequestBody(body: ApiFetcherArgs['body']): string | undefined 
 async function apiFetch(args: ApiFetcherArgs) {
   const url = args.path
   const isServer = typeof window === 'undefined'
+  const isGet = args.method.toUpperCase() === 'GET'
 
   try {
     const response = await fetch(url, {
@@ -44,9 +47,15 @@ async function apiFetch(args: ApiFetcherArgs) {
       },
       body: serializeRequestBody(args.body),
       credentials: isServer ? 'omit' : 'include',
-      // Always no-store on SSR: empty timeout responses must not be ISR-cached as a blank site
-      cache: 'no-store' as const,
-      ...(isServer ? { signal: AbortSignal.timeout(SSR_FETCH_TIMEOUT_MS) } : {}),
+      ...(isServer && isGet
+        ? {
+            next: { revalidate: SSR_REVALIDATE_SECONDS },
+            signal: AbortSignal.timeout(SSR_FETCH_TIMEOUT_MS),
+          }
+        : {
+            cache: 'no-store' as const,
+            ...(isServer ? { signal: AbortSignal.timeout(SSR_FETCH_TIMEOUT_MS) } : {}),
+          }),
     })
 
     const contentType = response.headers.get('content-type')
