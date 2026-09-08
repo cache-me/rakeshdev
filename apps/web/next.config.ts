@@ -12,7 +12,8 @@ loadEnv({ path: path.join(__dirname, '.env') })
 const apiUrl = process.env.API_URL ?? 'http://localhost:3000'
 
 const nextConfig: NextConfig = {
-  output: 'standalone',
+  // Standalone is for Docker self-host; Vercel uses its own output pipeline.
+  ...(process.env.VERCEL ? {} : { output: 'standalone' as const }),
   outputFileTracingRoot: path.join(__dirname, '../..'),
   transpilePackages: ['@portfolio/contracts', '@portfolio/types', '@portfolio/validation'],
   images: {
