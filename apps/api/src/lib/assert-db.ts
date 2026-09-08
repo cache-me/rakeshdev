@@ -1,16 +1,17 @@
 import '../load-env.js'
 
-import { createDb } from '@portfolio/db'
 import { sql } from 'drizzle-orm'
 
-const url =
-  process.env.DATABASE_URL ??
-  'postgresql://portfolio:portfolio@localhost:5433/portfolio'
+import { db } from './db.js'
+import { env } from './env.js'
 
 function maskDatabaseUrl(raw: string) {
   return raw.replace(/:([^:@/]+)@/, ':****@')
 }
 
+/**
+ * Ping the same DB singleton the app uses (no second pooler connection).
+ */
 export async function assertDatabaseReady() {
   if (!process.env.DATABASE_URL) {
     console.error(
@@ -19,7 +20,8 @@ export async function assertDatabaseReady() {
     process.exit(1)
   }
 
-  const { db, client } = createDb(url)
+  const url = env.DATABASE_URL
+
   try {
     await db.execute(sql`SELECT 1`)
   } catch (err) {
@@ -43,7 +45,5 @@ export async function assertDatabaseReady() {
         `  Or run locally: DATABASE_URL=... pnpm db:migrate\n`,
     )
     process.exit(1)
-  } finally {
-    await client.end()
   }
 }

@@ -48,6 +48,8 @@ async function proxyRequest(req: NextRequest, pathSegments: string[]) {
     headers,
     redirect: 'manual',
     cache: 'no-store',
+    // Don't let Vercel functions hang for the full platform limit when Render/DB stalls
+    signal: AbortSignal.timeout(20_000),
   }
 
   if (req.method !== 'GET' && req.method !== 'HEAD') {
@@ -59,15 +61,18 @@ async function proxyRequest(req: NextRequest, pathSegments: string[]) {
     upstream = await fetch(target, init)
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Upstream unreachable'
+    const timedOut =
+      (error instanceof Error && error.name === 'TimeoutError') ||
+      /aborted|timeout/i.test(message)
     return Response.json(
       {
         success: false,
         error: {
-          code: 'API_UNAVAILABLE',
+          code: timedOut ? 'API_TIMEOUT' : 'API_UNAVAILABLE',
           message: `Backend proxy failed (${backendBase()}): ${message}`,
         },
       },
-      { status: 502 },
+      { status: timedOut ? 504 : 502 },
     )
   }
 

@@ -11,7 +11,7 @@ import {
   skills,
   testimonials,
 } from '@portfolio/db'
-import { and, eq, ilike, or } from 'drizzle-orm'
+import { and, eq, ilike, inArray, or } from 'drizzle-orm'
 
 
 import { db } from '../lib/db.js'
@@ -45,27 +45,34 @@ export async function listProjects(featured?: boolean) {
     )
     .orderBy(projects.sortOrder)
 
-  return Promise.all(
-    rows.map(async (p) => {
-      const techs = await db
-        .select()
-        .from(projectTechnologies)
-        .where(eq(projectTechnologies.projectId, p.id))
-      return {
-        id: p.id,
-        title: p.title,
-        slug: p.slug,
-        summary: p.summary,
-        featured: p.featured,
-        coverImageUrl: p.coverImageUrl,
-        demoUrl: p.demoUrl,
-        repoUrl: p.repoUrl,
-        technologies: techs.map((t) => t.technology),
-        startedAt: p.startedAt,
-        completedAt: p.completedAt,
-      }
-    }),
-  )
+  if (rows.length === 0) return []
+
+  // One round-trip for techs (avoids Promise.all + max:1 pooler queue stalls)
+  const allTechs = await db
+    .select()
+    .from(projectTechnologies)
+    .where(inArray(projectTechnologies.projectId, rows.map((p) => p.id)))
+
+  const techsByProject = new Map<string, string[]>()
+  for (const t of allTechs) {
+    const list = techsByProject.get(t.projectId) ?? []
+    list.push(t.technology)
+    techsByProject.set(t.projectId, list)
+  }
+
+  return rows.map((p) => ({
+    id: p.id,
+    title: p.title,
+    slug: p.slug,
+    summary: p.summary,
+    featured: p.featured,
+    coverImageUrl: p.coverImageUrl,
+    demoUrl: p.demoUrl,
+    repoUrl: p.repoUrl,
+    technologies: techsByProject.get(p.id) ?? [],
+    startedAt: p.startedAt,
+    completedAt: p.completedAt,
+  }))
 }
 
 export async function getProjectBySlug(slug: string) {

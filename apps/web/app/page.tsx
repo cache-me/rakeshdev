@@ -2,8 +2,8 @@ import CyberHomePage from '@/features/home/cyber-home-page'
 import { apiClient } from '@/lib/api'
 import { createPageMetadata, personJsonLd } from '@/lib/seo'
 
-/** Cache homepage so Render cold starts do not block every visitor. */
-export const revalidate = 120
+/** Always fetch fresh portfolio data — blank SSR must not be cached when the API is down. */
+export const dynamic = 'force-dynamic'
 
 export const metadata = createPageMetadata({
   title: 'Rakesh — Full-Stack Developer',

@@ -6,7 +6,10 @@ import { requestId } from 'hono/request-id'
 import { secureHeaders } from 'hono/secure-headers'
 
 
+import { sql } from 'drizzle-orm'
+
 import { auth } from './lib/auth.js'
+import { db } from './lib/db.js'
 import { env } from './lib/env.js'
 import { createHonoEndpoints } from './lib/ts-rest-hono.js'
 import { apiRouter } from './routes/api.router.js'
@@ -43,6 +46,25 @@ export function createApp() {
         500,
       )
     })
+
+  // Liveness (no DB). Use /api/health/db to verify Postgres from the app pool.
+  app.get('/api/health/db', async (c) => {
+    const started = Date.now()
+    try {
+      await db.execute(sql`SELECT 1`)
+      return c.json({ ok: true as const, db: true as const, ms: Date.now() - started })
+    } catch (err) {
+      return c.json(
+        {
+          ok: false as const,
+          db: false as const,
+          ms: Date.now() - started,
+          error: err instanceof Error ? err.message : String(err),
+        },
+        503,
+      )
+    }
+  })
 
   app.all('/api/auth/*', (c) => auth.handler(c.req.raw))
 
