@@ -1,17 +1,17 @@
 import { initClient, type ApiFetcherArgs } from '@ts-rest/core'
 import { contract } from '@portfolio/contracts'
 
+const SSR_REVALIDATE_SECONDS = 120
+const SSR_FETCH_TIMEOUT_MS = 12_000
+
 /**
  * Browser: same-origin `/api` (Next rewrite).
- * Server: prefer the public site URL so requests go through Next rewrites; optional
- * `API_INTERNAL_URL` for direct API access in production.
+ * Server: hit API_URL directly when set (avoids Vercel→self→Render double hop).
  */
 function getApiBaseUrl() {
   if (typeof window !== 'undefined') return '/api'
 
-  const direct =
-    process.env.API_INTERNAL_URL ??
-    (process.env.API_SSR_DIRECT === 'true' ? process.env.API_URL : undefined)
+  const direct = process.env.API_INTERNAL_URL ?? process.env.API_URL
 
   if (direct) {
     return `${direct.replace(/\/$/, '')}/api`
@@ -27,13 +27,14 @@ function getApiBaseUrl() {
 
 function serializeRequestBody(body: ApiFetcherArgs['body']): string | undefined {
   if (body === undefined || body === null) return undefined
-  // @ts-rest/core already JSON.stringify's object bodies before calling the fetcher.
   if (typeof body === 'string') return body
   return JSON.stringify(body)
 }
 
 async function apiFetch(args: ApiFetcherArgs) {
   const url = args.path
+  const isServer = typeof window === 'undefined'
+  const isGet = args.method.toUpperCase() === 'GET'
 
   try {
     const response = await fetch(url, {
@@ -43,8 +44,16 @@ async function apiFetch(args: ApiFetcherArgs) {
         ...(args.headers ?? {}),
       },
       body: serializeRequestBody(args.body),
-      credentials: 'include',
-      cache: 'no-store',
+      credentials: isServer ? 'omit' : 'include',
+      ...(isServer && isGet
+        ? {
+            next: { revalidate: SSR_REVALIDATE_SECONDS },
+            signal: AbortSignal.timeout(SSR_FETCH_TIMEOUT_MS),
+          }
+        : {
+            cache: 'no-store' as const,
+            ...(isServer ? { signal: AbortSignal.timeout(SSR_FETCH_TIMEOUT_MS) } : {}),
+          }),
     })
 
     const contentType = response.headers.get('content-type')
