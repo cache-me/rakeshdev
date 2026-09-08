@@ -9,8 +9,6 @@ const monorepoRoot = path.join(__dirname, '../..')
 loadEnv({ path: path.join(monorepoRoot, '.env') })
 loadEnv({ path: path.join(__dirname, '.env') })
 
-const apiUrl = process.env.API_URL ?? 'http://localhost:3000'
-
 const nextConfig: NextConfig = {
   // Standalone is for Docker self-host; Vercel uses its own output pipeline.
   ...(process.env.VERCEL ? {} : { output: 'standalone' as const }),
@@ -23,14 +21,12 @@ const nextConfig: NextConfig = {
     ],
   },
   async rewrites() {
+    // Browser /api/* is handled at runtime by app/api/[...path] (reads API_URL from env).
+    // Keep resume.pdf as an internal rewrite into that proxy.
     return [
       {
         source: '/resume.pdf',
-        destination: `${apiUrl}/api/resume/pdf`,
-      },
-      {
-        source: '/api/:path*',
-        destination: `${apiUrl}/api/:path*`,
+        destination: '/api/resume/pdf',
       },
     ]
   },
