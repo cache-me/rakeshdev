@@ -29,5 +29,25 @@ fi
 echo "[portfolio/api] Applying Drizzle migrations..."
 pnpm --filter @portfolio/db db:migrate
 
+# One-shot production bootstrap (set on Render for ONE deploy, then remove):
+#   RUN_SEED=true
+#   ADMIN_EMAIL=you@email.com
+#   ADMIN_PASSWORD=strong-password
+#   ADMIN_NAME=Your Name
+if [ "${RUN_SEED:-}" = "true" ] || [ "${RUN_SEED:-}" = "1" ]; then
+  echo "[portfolio/api] RUN_SEED enabled — wiping + seeding portfolio tables..."
+  pnpm --filter @portfolio/db db:seed
+  echo "[portfolio/api] Seed completed. Remove RUN_SEED from Render env after this deploy."
+fi
+
+if [ -n "${ADMIN_EMAIL:-}" ] && [ -n "${ADMIN_PASSWORD:-}" ]; then
+  echo "[portfolio/api] Ensuring admin user ${ADMIN_EMAIL}..."
+  pnpm --filter @portfolio/api run create-admin \
+    "$ADMIN_EMAIL" \
+    "$ADMIN_PASSWORD" \
+    "${ADMIN_NAME:-Admin}"
+  echo "[portfolio/api] Admin ready. Remove ADMIN_PASSWORD from Render env after this deploy."
+fi
+
 echo "[portfolio/api] Starting API..."
 exec pnpm --filter @portfolio/api start

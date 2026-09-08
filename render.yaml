@@ -48,3 +48,14 @@ services:
         sync: false
       - key: SUPABASE_PUBLISHABLE_KEY
         sync: false
+      # One-shot bootstrap (set for one deploy, then delete):
+      # RUN_SEED=true
+      # ADMIN_EMAIL / ADMIN_PASSWORD / ADMIN_NAME
+      - key: RUN_SEED
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: ADMIN_NAME
+        sync: false
