@@ -23,6 +23,12 @@ export const auth = betterAuth({
     enabled: true,
   },
   trustedOrigins: [env.CORS_ORIGIN],
+  // Vercel → Next proxy → Render: use single-value client IP headers from our proxy.
+  advanced: {
+    ipAddress: {
+      ipAddressHeaders: ['x-client-ip', 'x-real-ip', 'x-forwarded-for'],
+    },
+  },
   plugins: [
     admin({
       defaultRole: 'user',

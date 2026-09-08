@@ -30,6 +30,19 @@ async function proxyRequest(req: NextRequest, pathSegments: string[]) {
     if (!HOP_BY_HOP.has(key.toLowerCase())) headers.set(key, value)
   })
 
+  // Better Auth rate-limit needs a single trustworthy client IP (not a multi-hop chain).
+  const forwarded = req.headers.get('x-forwarded-for')
+  const clientIp =
+    forwarded?.split(',')[0]?.trim() ||
+    req.headers.get('x-real-ip')?.trim() ||
+    req.headers.get('x-vercel-forwarded-for')?.split(',')[0]?.trim() ||
+    null
+  if (clientIp) {
+    headers.set('x-client-ip', clientIp)
+    headers.set('x-real-ip', clientIp)
+    headers.set('x-forwarded-for', clientIp)
+  }
+
   const init: RequestInit = {
     method: req.method,
     headers,
