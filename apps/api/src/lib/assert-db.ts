@@ -1,8 +1,8 @@
 import '../load-env.js'
 
+import { createDb } from '@portfolio/db'
 import { sql } from 'drizzle-orm'
 
-import { db } from './db.js'
 import { env } from './env.js'
 
 function maskDatabaseUrl(raw: string) {
@@ -10,7 +10,7 @@ function maskDatabaseUrl(raw: string) {
 }
 
 /**
- * Ping the same DB singleton the app uses (no second pooler connection).
+ * Boot-time ping with a disposable connection (does not keep a long-lived pool).
  */
 export async function assertDatabaseReady() {
   if (!process.env.DATABASE_URL) {
@@ -21,6 +21,7 @@ export async function assertDatabaseReady() {
   }
 
   const url = env.DATABASE_URL
+  const { db, client } = createDb(url)
 
   try {
     await db.execute(sql`SELECT 1`)
@@ -45,5 +46,7 @@ export async function assertDatabaseReady() {
         `  Or run locally: DATABASE_URL=... pnpm db:migrate\n`,
     )
     process.exit(1)
+  } finally {
+    await client.end({ timeout: 2 })
   }
 }

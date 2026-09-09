@@ -9,7 +9,7 @@ import { secureHeaders } from 'hono/secure-headers'
 import { sql } from 'drizzle-orm'
 
 import { auth } from './lib/auth.js'
-import { db } from './lib/db.js'
+import { db, runWithDb } from './lib/db.js'
 import { env } from './lib/env.js'
 import { createHonoEndpoints } from './lib/ts-rest-hono.js'
 import { apiRouter } from './routes/api.router.js'
@@ -28,6 +28,14 @@ export function createApp() {
         credentials: true,
       }),
     )
+    // Fresh Postgres connection per request (avoids hung PgBouncer sockets)
+    .use('*', async (c, next) => {
+      if (c.req.path === '/api/health') {
+        await next()
+        return
+      }
+      await runWithDb(() => next())
+    })
     .onError((err, c) => {
       if (err instanceof HTTPException) {
         return c.json(

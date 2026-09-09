@@ -35,14 +35,10 @@ export function createDb(connectionString: string) {
     // Avoid pg_catalog probes that can stall on restricted / pooled backends
     fetch_types: !pooled,
     ssl: connectionString.includes('supabase.co') ? 'require' : undefined,
-    connect_timeout: 10,
-    // Close before PgBouncer / cloud idle killers leave half-open sockets that hang queries
-    idle_timeout: pooled ? 20 : 60,
-    max_lifetime: pooled ? 60 * 5 : 60 * 30,
-    connection: {
-      // Fail locked / stuck queries instead of hanging the API forever (ms)
-      statement_timeout: 15_000,
-    },
+    connect_timeout: 8,
+    // Prefer short lifetimes under PgBouncer — stale sockets hang SELECT forever
+    idle_timeout: pooled ? 10 : 60,
+    max_lifetime: pooled ? 60 : 60 * 30,
   })
   const db = drizzle(client, { schema })
   return { db, client }
