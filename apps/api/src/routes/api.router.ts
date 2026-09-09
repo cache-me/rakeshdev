@@ -12,6 +12,7 @@ import { buildResumeDocument } from '../services/resume.service.js'
 import {
   createContactMessage,
   getBlogPostBySlug,
+  getHomeBootstrap,
   getProjectBySlug,
   getSiteSettings,
   listBlogPosts,
@@ -64,6 +65,11 @@ export const apiRouter = tsr.router(contract, {
           data: { ...rest, socialLinks },
         },
       }
+    },
+    getHome: async function getHome({ query }) {
+      const featured = query?.featured ?? true
+      const data = await getHomeBootstrap(featured)
+      return { status: 200, body: { success: true as const, data } }
     },
   },
   projects: {

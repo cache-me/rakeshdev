@@ -1,5 +1,3 @@
-import { AsyncLocalStorage } from 'node:async_hooks'
-
 import { createDb, type Database } from '@portfolio/db'
 
 import { env } from './env.js'
@@ -7,39 +5,85 @@ import { env } from './env.js'
 type DbBundle = ReturnType<typeof createDb>
 
 /**
- * PgBouncer (Supabase transaction pooler) silently drops idle backends.
- * A long-lived singleton then hangs forever on the next query.
- * Use one short-lived connection per request instead.
+ * Free-tier Supabase pooler only allows a few clients.
+ * Opening a new connection per parallel request exhausts the pool and hangs forever.
+ * Keep one shared client, serialize access, and recycle after idle.
  */
-const dbContext = new AsyncLocalStorage<DbBundle>()
+let bundle: DbBundle | null = null
+let lastUsedAt = 0
+let queue: Promise<unknown> = Promise.resolve()
 
-let fallback: DbBundle | null = null
+const IDLE_RECYCLE_MS = 12_000
 
-function getBundle(): DbBundle {
-  const fromRequest = dbContext.getStore()
-  if (fromRequest) return fromRequest
-  if (!fallback) fallback = createDb(env.DATABASE_URL)
-  return fallback
+async function getBundle(): Promise<DbBundle> {
+  const now = Date.now()
+  if (bundle && now - lastUsedAt > IDLE_RECYCLE_MS) {
+    const old = bundle
+    bundle = null
+    try {
+      await old.client.end({ timeout: 1 })
+    } catch {
+      // ignore
+    }
+  }
+  if (!bundle) {
+    bundle = createDb(env.DATABASE_URL)
+  }
+  lastUsedAt = Date.now()
+  return bundle
 }
 
-/** Drizzle handle — request-scoped when `runWithDb` is active. */
+async function resetBundle(reason: string) {
+  console.warn('[portfolio/api] Resetting DB client:', reason)
+  const old = bundle
+  bundle = null
+  if (old) {
+    try {
+      await old.client.end({ timeout: 1 })
+    } catch {
+      // ignore
+    }
+  }
+}
+
+/** Always resolved through `runWithDb` during requests. */
 export const db: Database = new Proxy({} as Database, {
   get(_target, prop) {
-    const active = getBundle().db as object
+    if (!bundle) {
+      throw new Error('DB used outside runWithDb()')
+    }
+    const active = bundle.db as object
     const value = Reflect.get(active, prop, active)
     return typeof value === 'function' ? (value as (...a: unknown[]) => unknown).bind(active) : value
   },
 })
 
-export async function runWithDb<T>(fn: () => Promise<T>): Promise<T> {
-  const bundle = createDb(env.DATABASE_URL)
-  try {
-    return await dbContext.run(bundle, fn)
-  } finally {
+export async function runWithDb<T>(fn: () => Promise<T>, timeoutMs = 12_000): Promise<T> {
+  const run = queue.then(async () => {
+    await getBundle()
+    let timer: ReturnType<typeof setTimeout> | undefined
     try {
-      await bundle.client.end({ timeout: 2 })
-    } catch {
-      // ignore close races
+      return await Promise.race([
+        fn(),
+        new Promise<never>((_, reject) => {
+          timer = setTimeout(() => reject(new Error('DB_TIMEOUT')), timeoutMs)
+        }),
+      ])
+    } catch (err) {
+      if (err instanceof Error && err.message === 'DB_TIMEOUT') {
+        await resetBundle('query timeout')
+      }
+      throw err
+    } finally {
+      if (timer) clearTimeout(timer)
+      lastUsedAt = Date.now()
     }
-  }
+  })
+
+  queue = run.then(
+    () => undefined,
+    () => undefined,
+  )
+
+  return run
 }

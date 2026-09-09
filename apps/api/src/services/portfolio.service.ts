@@ -275,6 +275,16 @@ export async function searchPortfolio(q: string, type: string) {
   return results
 }
 
+export async function getHomeBootstrap(featured = true) {
+  // Sequential on one pooled connection — avoids free-tier pool exhaustion
+  const settings = await getSiteSettings()
+  const projects = await listProjects(featured ? true : undefined)
+  const skills = await listSkills()
+  const experience = await listExperience()
+  const services = await listServices()
+  return { settings, projects, skills, experience, services }
+}
+
 export async function getPortfolioContext() {
   const [settings, projectRows, skillRows, expRows, serviceRows, educationRows] =
     await Promise.all([

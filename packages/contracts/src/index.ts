@@ -133,6 +133,26 @@ export const siteContract = c.router({
       404: apiErrorSchema,
     },
   },
+  getHome: {
+    method: 'GET',
+    path: '/site/home',
+    query: z
+      .object({
+        featured: z.coerce.boolean().optional(),
+      })
+      .optional(),
+    responses: {
+      200: success(
+        z.object({
+          settings: siteSettingsSchema.nullable(),
+          projects: z.array(projectListItemSchema),
+          skills: z.array(skillSchema),
+          experience: z.array(experienceSchema),
+          services: z.array(serviceSchema),
+        }),
+      ),
+    },
+  },
 })
 
 export const projectsContract = c.router({

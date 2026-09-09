@@ -1,8 +1,8 @@
-import CyberPage from '@/features/cyber/cyber-page'
-import CyberProjectsPage from '@/features/cyber/pages/cyber-projects-page'
-import { apiClient } from '@/lib/api'
+import ProjectsPageClient from './projects-page-client'
 import { createPageMetadata } from '@/lib/seo'
-import { getSiteBrandName } from '@/lib/site-brand'
+import { homeFallback } from '@/lib/home-fallback'
+
+export const dynamic = 'force-static'
 
 export const metadata = createPageMetadata({
   title: 'Projects — Rakesh',
@@ -10,16 +10,6 @@ export const metadata = createPageMetadata({
   path: '/projects',
 })
 
-export default async function ProjectsPage() {
-  const [brandName, res] = await Promise.all([
-    getSiteBrandName(),
-    apiClient.projects.list({ query: {} }),
-  ])
-  const projects = res.status === 200 && res.body.success ? res.body.data : []
-
-  return (
-    <CyberPage brandName={brandName}>
-      <CyberProjectsPage projects={projects} />
-    </CyberPage>
-  )
+export default function ProjectsPage() {
+  return <ProjectsPageClient brandName={homeFallback.brandName} />
 }

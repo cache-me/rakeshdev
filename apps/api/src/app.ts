@@ -28,13 +28,26 @@ export function createApp() {
         credentials: true,
       }),
     )
-    // Fresh Postgres connection per request (avoids hung PgBouncer sockets)
+    // Fresh/serialized Postgres access (avoids hung PgBouncer sockets + pool exhaustion)
     .use('*', async (c, next) => {
       if (c.req.path === '/api/health') {
         await next()
         return
       }
-      await runWithDb(() => next())
+      try {
+        await runWithDb(() => next())
+      } catch (err) {
+        if (err instanceof Error && err.message === 'DB_TIMEOUT') {
+          return c.json(
+            {
+              success: false,
+              error: { code: 'DB_TIMEOUT', message: 'Database query timed out' },
+            },
+            503,
+          )
+        }
+        throw err
+      }
     })
     .onError((err, c) => {
       if (err instanceof HTTPException) {

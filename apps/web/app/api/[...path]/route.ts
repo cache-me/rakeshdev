@@ -48,8 +48,8 @@ async function proxyRequest(req: NextRequest, pathSegments: string[]) {
     headers,
     redirect: 'manual',
     cache: 'no-store',
-    // Keep under homepage SSR budget so proxy failures fail fast
-    signal: AbortSignal.timeout(8_000),
+    // Keep under platform limits but allow Render cold start + one DB round-trip
+    signal: AbortSignal.timeout(25_000),
   }
 
   if (req.method !== 'GET' && req.method !== 'HEAD') {

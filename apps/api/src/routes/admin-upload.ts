@@ -15,7 +15,7 @@ const extByMime: Record<string, string> = {
   'image/png': '.png',
   'image/webp': '.webp',
   'image/gif': '.gif',
-}
+} 
 
 function projectUploadDir() {
   const here = path.dirname(fileURLToPath(import.meta.url))
